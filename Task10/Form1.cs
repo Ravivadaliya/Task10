@@ -1,27 +1,22 @@
-﻿using Microsoft.VisualBasic.FileIO;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Task10
 {
     public partial class Form1 : Form
     {
+
         private FileStream fileStream;
         private const int bufferSize = 102400;
+
 
         public Form1()
         {
             InitializeComponent();
+            SourceTextBox.Text = "D:\\ALL MOVIES\\Asur.mkv";
+            DestinationTextBox.Text = "C:\\Users\\raviv\\Desktop\\New folder\\Asur.mkv";
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -29,6 +24,7 @@ namespace Task10
         }
 
 
+        #region source and destination button click
 
         //select source and destination method
         private void SourceSelect_Click(object sender, EventArgs e)
@@ -50,34 +46,16 @@ namespace Task10
             }
         }
 
+        #endregion
 
 
 
 
-        //start and stop button methods 
 
-        //when start buttton click
-        //private void Startbutton_Click(object sender, EventArgs e)
-        //{
+        #region start stop button
 
-        //    if (string.IsNullOrEmpty(SourceTextBox.Text) || string.IsNullOrEmpty(DestinationTextBox.Text))
-        //    {
-        //        MessageBox.Show("Please select source and destination folders.");
-        //        return;
-        //    }
 
-        //    if (fileStream == null)
-        //    {
-        //        fileStream = new FileStream(SourceTextBox.Text, FileMode.Open, FileAccess.Read);
-        //        //progressBar.Value = 0;
-        //        //progressBar.Maximum = (int)fileStream.Length;
-        //        progressBar.Maximum = 100;
-        //        progressBar.Minimum = 0;
-
-        //        Thread transferThread = new Thread(StartTransfer);
-        //        transferThread.Start();
-        //    }
-        //}
+        //start button code
         private void Startbutton_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(SourceTextBox.Text) || string.IsNullOrEmpty(DestinationTextBox.Text))
@@ -90,7 +68,6 @@ namespace Task10
             {
                 fileStream = new FileStream(SourceTextBox.Text, FileMode.Open, FileAccess.Read);
 
-                //progressBar.Maximum = (int)fileStream.Length;
                 progressBar.Maximum = 100;
                 progressBar.Minimum = 0;
 
@@ -101,49 +78,38 @@ namespace Task10
 
 
 
+
         //this method call inside in above Startbutton_Click method
         long totalBytesRead = 0;  // Track total bytes read
+
         private void StartTransfer()
         {
             byte[] buffer = new byte[bufferSize];
             int bytesRead;
             long totalFileSize = fileStream.Length;
+            fileStream.Position = totalBytesRead;
 
-            while ((bytesRead = fileStream.Read(buffer, 0, bufferSize)) > 0)
+            while (fileStream != null && (bytesRead = fileStream.Read(buffer, 0, bufferSize)) > 0)
             {
+                //write byte to destination
                 using (FileStream destinationStream = new FileStream(DestinationTextBox.Text, FileMode.Append, FileAccess.Write))
                 {
                     destinationStream.Write(buffer, 0, bytesRead);
                 }
 
+                //progressbar
                 totalBytesRead += bytesRead;  // Update total bytes read
-
-                //progressBar.Invoke((MethodInvoker)delegate
-                //{
-
-                //    long progressScale = totalFileSize / progressBar.Maximum;
-                //    progressBar.Value = (int)(totalBytesRead / progressScale);
-
-                //    double percentage = ((double)progressBar.Value / progressBar.Maximum) * 100;
-                //    TransferPercentage.Text = $"{percentage:F2}%";
-                //});
                 progressBar.Invoke((MethodInvoker)delegate
                 {
-                    // Update progress based on the total progress made
                     long progressScale = totalFileSize / progressBar.Maximum;
                     int progressValue = (int)(totalBytesRead / progressScale);
 
-                    // Ensure the progress value does not exceed the maximum
                     progressBar.Value = Math.Min(progressValue, progressBar.Maximum);
 
                     double percentage = ((double)progressBar.Value / progressBar.Maximum) * 100;
                     TransferPercentage.Text = $"{percentage:F2}%";
-                });
 
-                if (fileStream == null)
-                {
-                    break;
-                }
+                });
             }
 
             if (fileStream != null)
@@ -152,6 +118,8 @@ namespace Task10
                 fileStream = null;
             }
         }
+
+
 
 
         //when you click stop then this method calld
@@ -162,11 +130,10 @@ namespace Task10
                 fileStream.Close();
                 fileStream = null;
             }
-
         }
+
+
+        #endregion
     }
 }
-
-
-
 
