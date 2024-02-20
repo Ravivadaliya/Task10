@@ -38,6 +38,7 @@
             this.Sourcelabel = new System.Windows.Forms.Label();
             this.Destinationlabel = new System.Windows.Forms.Label();
             this.TransferPercentage = new System.Windows.Forms.Label();
+            this.ResumeButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // SourceTextBox
@@ -76,7 +77,7 @@
             // 
             // Startbutton
             // 
-            this.Startbutton.Location = new System.Drawing.Point(430, 159);
+            this.Startbutton.Location = new System.Drawing.Point(410, 159);
             this.Startbutton.Name = "Startbutton";
             this.Startbutton.Size = new System.Drawing.Size(132, 50);
             this.Startbutton.TabIndex = 5;
@@ -86,11 +87,11 @@
             // 
             // Stopbutton
             // 
-            this.Stopbutton.Location = new System.Drawing.Point(755, 159);
+            this.Stopbutton.Location = new System.Drawing.Point(774, 159);
             this.Stopbutton.Name = "Stopbutton";
             this.Stopbutton.Size = new System.Drawing.Size(130, 50);
             this.Stopbutton.TabIndex = 6;
-            this.Stopbutton.Text = "Stop";
+            this.Stopbutton.Text = "Pause";
             this.Stopbutton.UseVisualStyleBackColor = true;
             this.Stopbutton.Click += new System.EventHandler(this.Stopbutton_Click);
             // 
@@ -127,11 +128,22 @@
             this.TransferPercentage.Size = new System.Drawing.Size(0, 16);
             this.TransferPercentage.TabIndex = 10;
             // 
+            // ResumeButton
+            // 
+            this.ResumeButton.Location = new System.Drawing.Point(590, 159);
+            this.ResumeButton.Name = "ResumeButton";
+            this.ResumeButton.Size = new System.Drawing.Size(130, 50);
+            this.ResumeButton.TabIndex = 11;
+            this.ResumeButton.Text = "Resume";
+            this.ResumeButton.UseVisualStyleBackColor = true;
+            this.ResumeButton.Click += new System.EventHandler(this.ResumeButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1340, 518);
+            this.Controls.Add(this.ResumeButton);
             this.Controls.Add(this.TransferPercentage);
             this.Controls.Add(this.Destinationlabel);
             this.Controls.Add(this.Sourcelabel);
@@ -162,6 +174,7 @@
         private System.Windows.Forms.Label Sourcelabel;
         private System.Windows.Forms.Label Destinationlabel;
         private System.Windows.Forms.Label TransferPercentage;
+        private System.Windows.Forms.Button ResumeButton;
     }
 }
 
