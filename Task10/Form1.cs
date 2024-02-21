@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -11,13 +12,27 @@ namespace Task10
     public partial class Form1 : Form
     {
 
-        private FileStream fileStream;
         private const int bufferSize = 10240;
         public static long totalBytesRead = 0;  // Track total bytes read
         public static long totalFileSize = 0;
         public static bool flag = false;
         private ManualResetEvent pauseEvent = new ManualResetEvent(true);
 
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+            }
+        }
+
+        private void Form1_FormOpen(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = false;
+            }
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -31,6 +46,11 @@ namespace Task10
             ResumeButton.Enabled = false;
             Stopbutton.Enabled = false;
         }
+
+
+
+
+
 
 
         #region source and destination button click
@@ -60,11 +80,16 @@ namespace Task10
         #endregion
 
 
-        #region start stop button
+
+
+
+
+        #region start, pause ,resume
 
         //start button code
         private async void Startbutton_Click(object sender, EventArgs e)
         {
+            this.FormClosing += Form1_FormClosing;
             ResumeButton.Enabled = true;
             Stopbutton.Enabled = true;
             if (string.IsNullOrEmpty(SourceTextBox.Text) || string.IsNullOrEmpty(DestinationTextBox.Text))
@@ -73,23 +98,55 @@ namespace Task10
                 return;
             }
 
+
             string[] files = Directory.GetFiles(SourceTextBox.Text);
-            
+
             totalFileSize = files.Sum(file => new FileInfo(file).Length);
+
+
 
             foreach (string file in files)
             {
+                string destinationFile = Path.Combine(DestinationTextBox.Text, Path.GetFileName(file));
+
+                //if file already exist 
+                if (File.Exists(destinationFile))
+                {
+                    long destinationfilesize = new FileInfo(destinationFile).Length;
+                    FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                    if (destinationfilesize == fileStream.Length)
+                    {
+                        totalFileSize -= new FileInfo(file).Length;
+                        MessageBox.Show($"The file {destinationFile} already exists. Skipping.");
+                        continue;
+                    }
+                    else
+                    {
+                        fileStream.Position = destinationfilesize;
+                        await Task.Run(() => StartTransfer(fileStream, file));
+                    }
+                }
+
                 using (FileStream fileStream = new FileStream(file, FileMode.Open, FileAccess.Read))
                 {
                     await Task.Run(() => StartTransfer(fileStream, file));
                 }
             }
+            this.FormClosing += Form1_FormOpen;
+            Startbutton.Invoke((MethodInvoker)delegate
+            {
+                Startbutton.Enabled = false;
+            });
         }
 
 
         //this method call inside in above Startbutton_Click method
         private void StartTransfer(FileStream fileStream, string sourceFile)
         {
+            Startbutton.Invoke((MethodInvoker)delegate
+            {
+                Startbutton.Enabled = false;
+            });
             byte[] buffer = new byte[bufferSize];
             int bytesRead;
             string destinationFile = Path.Combine(DestinationTextBox.Text, Path.GetFileName(sourceFile));
@@ -121,9 +178,11 @@ namespace Task10
 
                         progressBar.Value = Math.Min(progressValue, progressBar.Maximum);
 
+
                         double percentage = ((double)progressBar.Value / progressBar.Maximum) * 100;
                         TransferPercentage.Text = $"{percentage:F2}%";
                     });
+
                 }
             }
         }
@@ -132,10 +191,7 @@ namespace Task10
         //when you click stop then this method calld
         private void Stopbutton_Click(object sender, EventArgs e)
         {
-            if (pauseEvent.WaitOne(0))
-            {
-                pauseEvent.Reset();
-            }
+            pauseEvent.Reset();
         }
 
 
@@ -147,7 +203,10 @@ namespace Task10
 
 
 
+
+
         #endregion
+
     }
 }
 
